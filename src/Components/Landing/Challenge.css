@@ -1,0 +1,64 @@
+.challenge-section {
+  /* background: var(--white); */
+  background-image: url("../../Images/background.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.pain-points-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* For larger screens - 3 columns */
+@media (min-width: 1200px) {
+  .pain-points-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* For medium screens - 2 columns */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .pain-points-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* For small screens - 1 column */
+@media (max-width: 767px) {
+  .pain-points-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pain-point-card {
+  text-align: center;
+  padding: 40px 30px;
+  background: #ffffff88;
+  border-radius: 15px;
+  border: 1px solid #e6e6e6;
+  transition: transform 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.pain-point-card:hover {
+  transform: translateY(-5px);
+}
+
+.pain-point-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.pain-point-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: var(--primary-green);
+}
+
+.pain-point-card p {
+  color: var(--text-light);
+  line-height: 1.6;
+}

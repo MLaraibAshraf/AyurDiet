@@ -1,0 +1,136 @@
+.role-selection {
+  margin-bottom: 25px;
+}
+
+.role-selection h4 {
+  margin-bottom: 15px;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.role-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.role-option {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.role-option:hover {
+  border-color: var(--light-green);
+}
+
+.role-option.selected {
+  border-color: var(--primary-green);
+  background: var(--cream);
+  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.1);
+}
+
+.role-option input {
+  display: none;
+}
+
+.role-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-icon {
+  font-size: 2rem;
+}
+
+.role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.role-info strong {
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+
+.role-info span {
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+.role-benefits {
+  background: var(--cream);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 25px 0;
+  border-left: 4px solid var(--primary-green);
+}
+
+.role-benefits h4 {
+  color: var(--primary-green);
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.benefits-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefits-list li {
+  padding: 5px 0;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+.name-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.terms-agreement {
+  margin: 25px 0;
+}
+
+.terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text-light);
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+.terms-label input {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.terms-link {
+  color: var(--primary-green);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .role-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .name-fields {
+    grid-template-columns: 1fr;
+  }
+}
