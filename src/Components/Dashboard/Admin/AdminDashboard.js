@@ -8,7 +8,7 @@ import ContentManagement from "./ContentManagement";
 import FinancialOverview from "./FinancialOverview";
 import SystemHealth from "./SystemHealth";
 import QuickActions from "../../Common/QuickActions";
-import { adminDashboardService } from "../../../utils/mockDataService";
+import { adminService } from "../../../services/adminService";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
@@ -20,7 +20,7 @@ const AdminDashboard = () => {
 	useEffect(() => {
 		const loadDashboardData = async () => {
 			try {
-				const data = await adminDashboardService.getDashboardData();
+				const data = await adminService.getDashboardData();
 				setDashboardData(data);
 			} catch (error) {
 				console.error("Error loading dashboard data:", error);

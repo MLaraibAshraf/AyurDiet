@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { supabase } from "../config/supabase";
 
 const AuthContext = createContext();
 
@@ -15,27 +16,70 @@ export const AuthProvider = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const token = localStorage.getItem("authToken");
-		const userData = localStorage.getItem("userData");
+		const initAuth = async () => {
+			const { data: { session } } = await supabase.auth.getSession();
 
-		if (token && userData) {
-			setUser(JSON.parse(userData));
-		}
-		setLoading(false);
+			if (session?.user) {
+				await loadUserProfile(session.user.id);
+			}
+
+			setLoading(false);
+		};
+
+		initAuth();
+
+		const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+			(async () => {
+				if (session?.user) {
+					await loadUserProfile(session.user.id);
+				} else {
+					setUser(null);
+				}
+			})();
+		});
+
+		return () => {
+			subscription.unsubscribe();
+		};
 	}, []);
+
+	const loadUserProfile = async (userId) => {
+		const { data: profile, error } = await supabase
+			.from('profiles')
+			.select('*')
+			.eq('id', userId)
+			.maybeSingle();
+
+		if (profile && !error) {
+			setUser({
+				id: profile.id,
+				name: profile.name,
+				email: profile.email,
+				role: profile.role,
+				joinDate: profile.join_date,
+				phone: profile.phone,
+				avatarUrl: profile.avatar_url
+			});
+		}
+	};
 
 	const login = async (email, password) => {
 		try {
-			const response = await mockLoginAPI(email, password);
+			const { data, error } = await supabase.auth.signInWithPassword({
+				email,
+				password
+			});
 
-			if (response.success) {
-				setUser(response.user);
-				localStorage.setItem("authToken", response.token);
-				localStorage.setItem("userData", JSON.stringify(response.user));
-				return { success: true };
-			} else {
-				return { success: false, error: response.error };
+			if (error) {
+				return { success: false, error: error.message };
 			}
+
+			if (data.user) {
+				await loadUserProfile(data.user.id);
+				return { success: true };
+			}
+
+			return { success: false, error: "Login failed" };
 		} catch (error) {
 			return { success: false, error: "Login failed. Please try again." };
 		}
@@ -43,16 +87,48 @@ export const AuthProvider = ({ children }) => {
 
 	const register = async (userData) => {
 		try {
-			const response = await mockRegisterAPI(userData);
+			const { data: authData, error: authError } = await supabase.auth.signUp({
+				email: userData.email,
+				password: userData.password,
+			});
 
-			if (response.success) {
-				setUser(response.user);
-				localStorage.setItem("authToken", response.token);
-				localStorage.setItem("userData", JSON.stringify(response.user));
-				return { success: true };
-			} else {
-				return { success: false, error: response.error };
+			if (authError) {
+				return { success: false, error: authError.message };
 			}
+
+			if (!authData.user) {
+				return { success: false, error: "Registration failed" };
+			}
+
+			const { error: profileError } = await supabase
+				.from('profiles')
+				.insert({
+					id: authData.user.id,
+					name: userData.name,
+					email: userData.email,
+					role: userData.role || 'client',
+					phone: userData.phone
+				});
+
+			if (profileError) {
+				return { success: false, error: profileError.message };
+			}
+
+			if (userData.role === 'dietitian') {
+				await supabase.from('dietitian_profiles').insert({
+					id: authData.user.id,
+					practice_name: userData.practiceName || '',
+					specialization: userData.specialization || ''
+				});
+			} else if (userData.role === 'client') {
+				await supabase.from('client_profiles').insert({
+					id: authData.user.id,
+					health_goals: userData.healthGoals || []
+				});
+			}
+
+			await loadUserProfile(authData.user.id);
+			return { success: true };
 		} catch (error) {
 			return {
 				success: false,
@@ -61,10 +137,9 @@ export const AuthProvider = ({ children }) => {
 		}
 	};
 
-	const logout = () => {
+	const logout = async () => {
+		await supabase.auth.signOut();
 		setUser(null);
-		localStorage.removeItem("authToken");
-		localStorage.removeItem("userData");
 	};
 
 	const value = {
@@ -77,75 +152,4 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-// Mock API functions
-const mockLoginAPI = (email, password) => {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			const users = {
-				"client@ayursaas.com": {
-					id: 1,
-					name: "John Client",
-					email: "client@ayursaas.com",
-					role: "client",
-					joinDate: "2024-01-15",
-				},
-				"dietitian@ayursaas.com": {
-					id: 2,
-					name: "Dr. Anika Sharma",
-					email: "dietitian@ayursaas.com",
-					role: "dietitian",
-					joinDate: "2023-01-15",
-				},
-				"admin@ayursaas.com": {
-					id: 3,
-					name: "Admin User",
-					email: "admin@ayursaas.com",
-					role: "admin",
-					joinDate: "2022-01-15",
-				},
-			};
-
-			if (users[email] && password === "password") {
-				resolve({
-					success: true,
-					token: "mock-jwt-token",
-					user: users[email],
-				});
-			} else {
-				resolve({
-					success: false,
-					error: "Invalid email or password",
-				});
-			}
-		}, 1000);
-	});
-};
-
-
-const mockRegisterAPI = (userData) => {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve({
-				success: true,
-				token: "mock-jwt-token",
-				user: {
-					id: Date.now(),
-					...userData,
-					joinDate: new Date().toISOString().split("T")[0],
-					// Set default values based on role
-					...(userData.role === "dietitian" && {
-						practiceName: "",
-						specialization: "",
-						totalClients: 0,
-						monthlyRevenue: "$0",
-					}),
-					...(userData.role === "client" && {
-						healthGoals: [],
-					}),
-				},
-			});
-		}, 1000);
-	});
 };

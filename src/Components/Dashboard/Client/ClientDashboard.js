@@ -10,7 +10,7 @@ import FoodLog from "./FoodLog";
 import AppointmentsList from "./AppointmentsList";
 import QuickActions from "../../Common/QuickActions";
 import LoadingSpinner from "../../Common/LoadingSpinner";
-import { clientDashboardService } from "../../../utils/mockDataService";
+import { clientService } from "../../../services/clientService";
 import "./ClientDashboard.css";
 
 const ClientDashboard = () => {
@@ -21,7 +21,7 @@ const ClientDashboard = () => {
 	useEffect(() => {
 		const loadDashboardData = async () => {
 			try {
-				const data = await clientDashboardService.getDashboardData(user.id);
+				const data = await clientService.getDashboardData(user.id);
 				setDashboardData(data);
 			} catch (error) {
 				console.error("Error loading dashboard data:", error);

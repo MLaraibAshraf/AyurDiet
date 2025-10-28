@@ -9,7 +9,7 @@ import AppointmentSchedule from "./AppointmentSchedule";
 import DietPlanManagement from "./DietPlanManagement";
 import PracticeAnalytics from "./PracticeAnalytics";
 import QuickActions from "../../Common/QuickActions";
-import { dietitianDashboardService } from "../../../utils/mockDataService";
+import { dietitianService } from "../../../services/dietitianService";
 import LoadingSpinner from "../../Common/LoadingSpinner";
 import "./DietitianDashboard.css";
 
@@ -21,7 +21,7 @@ const DietitianDashboard = () => {
 	useEffect(() => {
 		const loadDashboardData = async () => {
 			try {
-				const data = await dietitianDashboardService.getDashboardData(user.id);
+				const data = await dietitianService.getDashboardData(user.id);
 				setDashboardData(data);
 			} catch (error) {
 				console.error("Error loading dashboard data:", error);
